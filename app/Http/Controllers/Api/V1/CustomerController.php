@@ -61,6 +61,10 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        //
+        $status = $customer?->delete();
+        
+        return response()->json([
+            'status'=> $status == true ? 'Customer has been deleted' : 'Unable to delete Customer'
+        ],$status == true ? 200 : 500);
     }
 }

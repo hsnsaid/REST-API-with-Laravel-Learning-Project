@@ -22,7 +22,11 @@ class StoreInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'customer_id'=>['required','integer','exists:customer,id'],
+            'amount'=>['required','numeric'],
+            'status'=>['required','string'],
+            'billed_date'=>['required', 'date', 'date_format:Y-m-d H:i:s'],
+            'paid_date'=>['date', 'date_format:Y-m-d H:i:s'],
         ];
     }
 }
