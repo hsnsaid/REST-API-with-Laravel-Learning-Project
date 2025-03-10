@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Filters\V1\InvoicesFilter;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\BulkStoreInvoiceRequest;
-use App\Http\Requests\UpdateInvoiceRequest;
 use App\Models\Invoice;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\InvoiceCollection;
@@ -40,7 +39,13 @@ class InvoiceController extends Controller
      */
     public function store(StoreInvoiceRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $invoice = Invoice::create($validated);
+
+        return response()->json([
+            'message' => $invoice == true ? 'Invoice has been created Successfully' : 'Falied creating the Invoice',
+            'invoice' => $invoice
+        ], $invoice == true ? 200 : 500);
     }
     public function bulk(BulkStoreInvoiceRequest $request){
         $bulk=collect($request->all())->map(function($arr,$key){
@@ -68,9 +73,29 @@ class InvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
+    public function update(StoreInvoiceRequest $request, Invoice $invoice)
     {
-        //
+        $invoiceUpdated = $request->validated();
+
+        
+        if ($invoice === null)
+            return response()->json([
+                'success' => false,
+                'message' => 'Invoice does not exists'
+            ], 404);
+
+        $invoice->customer_id = $invoiceUpdated['customer_id'];
+        $invoice->amount = $invoiceUpdated['amount'];
+        $invoice->status = $invoiceUpdated['status'];
+        $invoice->billed_date = $invoiceUpdated['billed_date'];
+        $invoice->paid_date = $invoiceUpdated['paid_date'];
+        $invoice->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'product updated successfully',
+            'invoice' => $invoice
+        ], 200);
     }
 
     /**
@@ -78,6 +103,10 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        $status = $invoice?->delete();
+
+        return response()->json([
+            'status'=> $status == true ? 'Invoice has been deleted' : 'Error while deleting Invoice'
+        ],$status == true ? 200 : 500);
     }
 }
