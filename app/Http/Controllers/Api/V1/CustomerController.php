@@ -61,6 +61,7 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
+        $customer?->invoices()->delete();
         $status = $customer?->delete();
         
         return response()->json([
